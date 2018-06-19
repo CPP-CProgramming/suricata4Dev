@@ -47,6 +47,7 @@
 #include "util-file.h"
 #include "util-time.h"
 #include "util-misc.h"
+#include "util-byte.h"
 
 #include "output.h"
 
@@ -341,6 +342,7 @@ static void LogFilestoreLogCreateMetaFile2(const Packet *p, const File *ff, char
 
         char* pos = NULL;
         int fm = 1;
+        char *sName = "";
       
         if(p->flow->alproto == ALPROTO_HTTP)
         {
@@ -378,25 +380,31 @@ static void LogFilestoreLogCreateMetaFile2(const Packet *p, const File *ff, char
         if(fm && p->flow->alproto == ALPROTO_HTTP)
          fprintf(fp,"%s", shortname);
         else
-         PrintRawUriFp(fp, ff->name, ff->name_len);
-        fprintf(fp,"%s", "\") ");
+         sName = BytesToString(ff->name, ff->name_len);
+         fprintf(fp, "%s", sName);
+         //PrintRawUriFp(fp, ff->name, ff->name_len);
+         fprintf(fp,"%s", "\") ");
         
         if (p->flow->alproto == ALPROTO_HTTP) {
             fprintf(fp, "url(\"");
-         LogFilestoreMetaGetHost(fp, p, ff);
+            LogFilestoreMetaGetHost(fp, p, ff);
             LogFilestoreMetaGetUri(fp, p, ff);
             fprintf(fp,"%s", "\") OrginalFilename(\"");
          if(fm)
             fprintf(fp,"%s", shortname);
          else
-            PrintRawUriFp(fp, ff->name, ff->name_len);
+            sName = BytesToString(ff->name, ff->name_len);
+            fprintf(fp, "%s", sName);
+            //PrintRawUriFp(fp, ff->name, ff->name_len);
             fprintf(fp,"%s", "\") ");
         }
         else if(p->flow->alproto == ALPROTO_FTP) {
-           fprintf(fp, "url(\"");
+            fprintf(fp, "url(\"");
            
             fprintf(fp,"%s", "\") OrginalFilename(\"");
-            PrintRawUriFp(fp, ff->name, ff->name_len);
+            sName = BytesToString(ff->name, ff->name_len);
+            fprintf(fp, "%s", sName);
+            //PrintRawUriFp(fp, ff->name, ff->name_len);
             fprintf(fp,"%s", "\") ");
       }
         //fprintf(fp, "APP PROTO:         %s\n",
