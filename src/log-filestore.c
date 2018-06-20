@@ -63,11 +63,13 @@
 
 #include <string.h>
 #include <time.h>
+#include <stdio.h>
 
 #define MODULE_NAME "LogFilestoreLog"
 
 static char g_logfile_base_dir[PATH_MAX] = "/tmp";
 static char g_working_file_suffix[PATH_MAX] = ".tmp";
+//static char extensions[] = {".exe", ".doc", ".xls", ".ppt", ".txt", ".jpg", ".eml"};
 
 
 SC_ATOMIC_DECLARE(uint32_t, filestore_open_file_cnt);  /**< Atomic counter of simultaneously open files */
@@ -83,6 +85,27 @@ static uint64_t LogFilestoreOpenFilesCounter(void)
 {
     uint64_t fcopy = SC_ATOMIC_GET(filestore_open_file_cnt);
     return fcopy;
+}
+
+static char* extensionSearch(char * fileName){
+    static const char* extensions[] = {"exe", "doc", "xls", "ppt", "txt", "jpg", "eml", "eml.log" };
+    
+    char * fName = fileName;
+   
+    char* tmpRetValue = "";
+    char* finalRetValue = "noExt";
+    for(int i=0; i<sizeof(extensions)/sizeof(const char *); i ++)
+    {
+        
+        tmpRetValue = strstr(fName, extensions[i]);
+        if(tmpRetValue != NULL && strcmp(tmpRetValue, extensions[i]) == 0)
+        {
+            finalRetValue = extensions[i];
+        }
+
+
+    }
+    return finalRetValue;
 }
 
 static void LogFilestoreMetaGetUri(FILE *fp, const Packet *p, const File *ff)
@@ -474,13 +497,17 @@ static void LogFilestoreLogCloseMetaFile(const File *ff)
 {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
+    char* fileName = BytesToString(ff->name, ff->name_len);
+    //printf("%s\n", fileName);
+    char* fileExt = extensionSearch(fileName);
     char pid_expression[PATH_MAX] = "";
     if (FileIncludePid())
         snprintf(pid_expression, sizeof(pid_expression), ".%d", getpid());
     char final_filename[PATH_MAX] = "";
-    if (snprintf(final_filename, sizeof(final_filename), "%s/http_%d%02d%02d_%s_%u", 
-            g_logfile_base_dir, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, pid_expression, ff->file_store_id) == sizeof(final_filename))
+    if (snprintf(final_filename, sizeof(final_filename), "%s/http_%d%02d%02d_%s_%u.%s", 
+            g_logfile_base_dir, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, pid_expression, ff->file_store_id, fileExt) == sizeof(final_filename))
         return;
+    //"%s/http_%d%02d%02d_%s_%u",
     char final_metafilename[PATH_MAX] = "";
     if (snprintf(final_metafilename, sizeof(final_metafilename),
             "%s.log", final_filename) == sizeof(final_metafilename))
@@ -550,11 +577,14 @@ static void LogFilestoreFinalizeFiles(const File *ff) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
     char pid_expression[PATH_MAX] = "";
+    char* fileName = BytesToString(ff->name, ff->name_len);
+    //printf("%s\n", fileName);
+    char* fileExt = extensionSearch(fileName);
     if (FileIncludePid())
         snprintf(pid_expression, sizeof(pid_expression), ".%d", getpid());
     char final_filename[PATH_MAX] = "";
-    if (snprintf(final_filename, sizeof(final_filename), "%s/http_%d%02d%02d_%s_%u", 
-            g_logfile_base_dir, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, pid_expression, ff->file_store_id) == sizeof(final_filename)) // "%s/file%s.%u"
+    if (snprintf(final_filename, sizeof(final_filename), "%s/http_%d%02d%02d_%s_%u.%s", 
+            g_logfile_base_dir, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, pid_expression, ff->file_store_id, fileExt) == sizeof(final_filename)) // "%s/file%s.%u"
         return;
     char working_filename[PATH_MAX] = "";
     if (snprintf(working_filename, sizeof(working_filename), "%s%s",
@@ -590,6 +620,9 @@ static int LogFilestoreLogger(ThreadVars *tv, void *thread_data, const Packet *p
 {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
+    char* fileName = BytesToString(ff->name, ff->name_len);
+    //printf("%s\n", fileName);
+    char* fileExt = extensionSearch(fileName);
     SCEnter();
     LogFilestoreLogThread *aft = (LogFilestoreLogThread *)thread_data;
     char filename[PATH_MAX] = "";
@@ -615,8 +648,8 @@ static int LogFilestoreLogger(ThreadVars *tv, void *thread_data, const Packet *p
     if (FileIncludePid())
         snprintf(pid_expression, sizeof(pid_expression), ".%d", getpid());
     char base_filename[PATH_MAX] = "";
-    if (snprintf(base_filename, sizeof(base_filename), "%s/http_%d%02d%02d_%s_%u", 
-            g_logfile_base_dir, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, pid_expression, ff->file_store_id) == sizeof(base_filename))
+    if (snprintf(base_filename, sizeof(base_filename), "%s/http_%d%02d%02d_%s_%u.%s", 
+            g_logfile_base_dir, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, pid_expression, ff->file_store_id, fileExt) == sizeof(base_filename))
         return -1;
     if (snprintf(filename, sizeof(filename), "%s%s", base_filename,
             g_working_file_suffix) == sizeof(filename))
