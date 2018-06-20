@@ -61,10 +61,14 @@
 #include "util-memcmp.h"
 #include "stream-tcp-reassemble.h"
 
+#include <string.h>
+#include <time.h>
+
 #define MODULE_NAME "LogFilestoreLog"
 
 static char g_logfile_base_dir[PATH_MAX] = "/tmp";
 static char g_working_file_suffix[PATH_MAX] = ".tmp";
+
 
 SC_ATOMIC_DECLARE(uint32_t, filestore_open_file_cnt);  /**< Atomic counter of simultaneously open files */
 
@@ -300,20 +304,27 @@ static void LogFilestoreLogCreateMetaFile2(const Packet *p, const File *ff, char
 
     char metafilename[PATH_MAX] = "";
     //char metafilepath[PATH_MAX] = "";
-
+    char *sName = "";
+    sName = BytesToString(ff->name, ff->name_len);
+    
+    
+    char* pos = NULL;
+    int fm = 1;
+    
     char shortname[NAME_MAX] = "";
     uint16_t shortname_len = 0;
 
-     //snprintf(metafilepath, sizeof(metafilepath), "%s.log", filepath);
-
-    if (snprintf(metafilename, sizeof(metafilename), "%s.meta%s", base_filename,
+     
+    if (snprintf(metafilename, sizeof(metafilename), "%s.log%s", base_filename,
             g_working_file_suffix) == sizeof(metafilename))
         return;
+    
+      
+
 
     FILE *fp = fopen(metafilename, "w+");
     if (fp != NULL) {
         char timebuf[64];
-
         CreateTimeString(&p->ts, timebuf, sizeof(timebuf));
         fprintf(fp, "%s %s ", AppProtoToString(p->flow->alproto), ProtoToString(p->proto));
         //fprintf(fp, "TIME:              %s\n", timebuf);
@@ -340,12 +351,8 @@ static void LogFilestoreLogCreateMetaFile2(const Packet *p, const File *ff, char
         sp = p->sp;
         dp = p->dp;
 
-        char* pos = NULL;
-        int fm = 1;
-        char *sName = "";
-      
         if(p->flow->alproto == ALPROTO_HTTP)
-        {
+         {
          pos = strrchr((char*)ff->name, '/');      
          if(pos == NULL)
          {
@@ -364,7 +371,10 @@ static void LogFilestoreLogCreateMetaFile2(const Packet *p, const File *ff, char
             snprintf(shortname, shortname_len, "%s", pos + 1);
             shortname[shortname_len] = 0;
          }
-      }
+        }
+        
+      
+         
 
 
         /*fprintf(fp, "SRC IP:            %s\n", srcip);
@@ -462,16 +472,18 @@ static const char *ProtoToString(unsigned int proto)
 
 static void LogFilestoreLogCloseMetaFile(const File *ff)
 {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
     char pid_expression[PATH_MAX] = "";
     if (FileIncludePid())
         snprintf(pid_expression, sizeof(pid_expression), ".%d", getpid());
     char final_filename[PATH_MAX] = "";
-    if (snprintf(final_filename, sizeof(final_filename), "%s/file%s.%u",
-            g_logfile_base_dir, pid_expression, ff->file_store_id) == sizeof(final_filename))
+    if (snprintf(final_filename, sizeof(final_filename), "%s/http_%d%02d%02d_%s_%u", 
+            g_logfile_base_dir, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, pid_expression, ff->file_store_id) == sizeof(final_filename))
         return;
     char final_metafilename[PATH_MAX] = "";
     if (snprintf(final_metafilename, sizeof(final_metafilename),
-            "%s.meta", final_filename) == sizeof(final_metafilename))
+            "%s.log", final_filename) == sizeof(final_metafilename))
         return;
     char working_metafilename[PATH_MAX] = "";
     if (snprintf(working_metafilename, sizeof(working_metafilename),
@@ -535,12 +547,14 @@ static void LogFilestoreLogCloseMetaFile(const File *ff)
 
 
 static void LogFilestoreFinalizeFiles(const File *ff) {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
     char pid_expression[PATH_MAX] = "";
     if (FileIncludePid())
         snprintf(pid_expression, sizeof(pid_expression), ".%d", getpid());
     char final_filename[PATH_MAX] = "";
-    if (snprintf(final_filename, sizeof(final_filename), "%s/file%s.%u",
-            g_logfile_base_dir, pid_expression, ff->file_store_id) == sizeof(final_filename))
+    if (snprintf(final_filename, sizeof(final_filename), "%s/http_%d%02d%02d_%s_%u", 
+            g_logfile_base_dir, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, pid_expression, ff->file_store_id) == sizeof(final_filename)) // "%s/file%s.%u"
         return;
     char working_filename[PATH_MAX] = "";
     if (snprintf(working_filename, sizeof(working_filename), "%s%s",
@@ -556,7 +570,7 @@ static void LogFilestoreFinalizeFiles(const File *ff) {
         LogFilestoreLogCloseMetaFile(ff);
         char final_metafilename[PATH_MAX] = "";
         if (snprintf(final_metafilename, sizeof(final_metafilename),
-                "%s.meta", final_filename) == sizeof(final_metafilename))
+                "%s.log", final_filename) == sizeof(final_metafilename))
             return;
         char working_metafilename[PATH_MAX] = "";
         if (snprintf(working_metafilename, sizeof(working_metafilename),
@@ -574,6 +588,8 @@ static void LogFilestoreFinalizeFiles(const File *ff) {
 static int LogFilestoreLogger(ThreadVars *tv, void *thread_data, const Packet *p,
         File *ff, const uint8_t *data, uint32_t data_len, uint8_t flags, uint8_t dir)
 {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
     SCEnter();
     LogFilestoreLogThread *aft = (LogFilestoreLogThread *)thread_data;
     char filename[PATH_MAX] = "";
@@ -599,8 +615,8 @@ static int LogFilestoreLogger(ThreadVars *tv, void *thread_data, const Packet *p
     if (FileIncludePid())
         snprintf(pid_expression, sizeof(pid_expression), ".%d", getpid());
     char base_filename[PATH_MAX] = "";
-    if (snprintf(base_filename, sizeof(base_filename), "%s/file%s.%u",
-            g_logfile_base_dir, pid_expression, ff->file_store_id) == sizeof(base_filename))
+    if (snprintf(base_filename, sizeof(base_filename), "%s/http_%d%02d%02d_%s_%u", 
+            g_logfile_base_dir, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, pid_expression, ff->file_store_id) == sizeof(base_filename))
         return -1;
     if (snprintf(filename, sizeof(filename), "%s%s", base_filename,
             g_working_file_suffix) == sizeof(filename))
