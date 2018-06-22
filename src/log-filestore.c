@@ -88,7 +88,7 @@ static uint64_t LogFilestoreOpenFilesCounter(void)
 }
 
 static char* extensionSearch(char * fileName){
-    static const char* extensions[] = {"exe", "doc", "xls", "ppt", "txt", "jpg", "eml", "eml.log" };
+    static const char* extensions[] = {"exe", "msi", "png", "alz","egg", "deb","gif","bmp", "dll", "zip", "rar", "7z", "gzip", "npk", "pkg", "sh","tar.gz","hwp", "doc", "xls", "ppt", "txt", "jpg", "eml", "eml.log" };
     
     char * fName = fileName;
    
