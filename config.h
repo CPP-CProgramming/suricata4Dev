@@ -44,7 +44,7 @@
 #define CONFIG_DIR "/etc/suricata/"
 
 /* Enable debug output */
-/* #undef DEBUG */
+#define DEBUG 1
 
 /* Enable (debug) validation code output */
 /* #undef DEBUG_VALIDATION */
@@ -538,7 +538,7 @@
 /* #undef PROFILING */
 
 /* Git revision */
-/* #undef REVISION */
+#define REVISION 0ce184e
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1

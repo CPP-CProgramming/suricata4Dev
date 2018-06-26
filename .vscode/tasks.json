@@ -4,9 +4,13 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "echo",
+            "label": "build",
             "type": "shell",
-            "command": "make && sudo make install"
+            "command": "./configure --prefix=/usr/ --sysconfdir=/etc/ --localstatedir=/var/ --with-libnss-libraries=/usr/lib --with-libnss-includes=/usr/include/nss/ --with-libnspr-libraries=/usr/lib --with-libnspr-includes=/usr/include/nspr CFLAGS=\"-ggdb -O0\" --enable-debug && make -j4 && sudo make install",
+            "group" : {
+                "kind" : "build",
+                "isDefault": true
+            }
         }
     ]
 }

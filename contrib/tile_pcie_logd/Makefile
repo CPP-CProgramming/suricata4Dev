@@ -185,7 +185,7 @@ CARGO =
 CARGO_HOME = 
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -march=native
+CFLAGS = -ggdb -O0 -march=native
 CLANG_CFLAGS = 
 CONFIGURE_LOCALSTATEDIR = /var
 CONFIGURE_PREFIX = /usr
@@ -216,7 +216,7 @@ HAVE_LLC =
 HAVE_PCAP_CONFIG = /usr/bin/pcap-config
 HAVE_PDFLATEX = no
 HAVE_PKG_CONFIG = /usr/bin/pkg-config
-HAVE_PYTHON = no
+HAVE_PYTHON = /usr/bin/python
 HAVE_RUSTC = 
 HAVE_SPHINXBUILD = no
 HAVE_WGET = /usr/bin/wget

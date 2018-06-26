@@ -44,6 +44,8 @@
 
 #include "util-logopenfile.h"
 #include "util-time.h"
+#include "util-clock.h"
+#include <time.h>
 
 #define DEFAULT_LOG_FILENAME "stats.log"
 #define MODULE_NAME "LogStatsLog"
@@ -96,15 +98,28 @@ static int LogStatsLogger(ThreadVars *tv, void *thread_data, const StatsTable *s
             tms->tm_mon + 1, tms->tm_mday, tms->tm_year + 1900, tms->tm_hour,
             tms->tm_min, tms->tm_sec, days, hours, min, sec);
     MemBufferWriteString(aft->buffer, "----------------------------------------------"
-            "--------------------------------------\n");
-    MemBufferWriteString(aft->buffer, "%-42s | %-25s | %-s\n", "Counter", "TM Name",
-            "Value");
+            "---------------------------------------------------------\n");
+    MemBufferWriteString(aft->buffer, "%-42s | %-25s | %-s | %-s\n", "Counter", "TM Name",
+            "Value", "Value per min");
     MemBufferWriteString(aft->buffer, "----------------------------------------------"
-            "--------------------------------------\n");
+            "---------------------------------------------------------\n");
+
+    // uint32_t zero value, Simply, I need it.
+    /*uint32_t zero = 0;
+    static uint64_t netStatValuesGinit[50];
+    static uint64_t netStatValuesGlast[50];
+    //uint64_t globalStatMiniteValue[(int)st->nstats];
+    static uint64_t netStatValuesTinit[50];
+    static uint64_t netStatValuesTlast[50];*/
+    //uint64_t threadStatMiniteValue[(int)st->tstats];
 
     /* global stats */
     uint32_t u = 0;
+    uint64_t gminSt = 0;
+    uint64_t tminSt = 0;
     if (aft->statslog_ctx->flags & LOG_STATS_TOTALS) {
+        
+
         for (u = 0; u < st->nstats; u++) {
             if (st->stats[u].name == NULL)
                 continue;
@@ -112,9 +127,23 @@ static int LogStatsLogger(ThreadVars *tv, void *thread_data, const StatsTable *s
             if (!(aft->statslog_ctx->flags & LOG_STATS_NULLS) && st->stats[u].value == 0)
                 continue;
 
+            /*if (sec == 0)
+            {
+                netStatValuesGinit[u] = st-> stats[u].value;
+            }
+            if (sec == 59)
+            {
+                netStatValuesGlast[u] = st-> stats[u].value - netStatValuesGinit[u];
+            }*/
+            if(in_min != 0)
+            {
+                gminSt = (st->stats[u].value)/in_min;
+            }
+
+
             char line[256];
-            size_t len = snprintf(line, sizeof(line), "%-42s | %-25s | %-" PRIu64 "\n",
-                    st->stats[u].name, st->stats[u].tm_name, st->stats[u].value);
+            size_t len = snprintf(line, sizeof(line), "%-42s | %-25s | %-" PRIu64 "|    %-25" PRIu64 "\n",
+                    st->stats[u].name, st->stats[u].tm_name, st->stats[u].value, gminSt);
 
             /* since we can have many threads, the buffer might not be big enough.
              * Expand if necessary. */
@@ -141,9 +170,15 @@ static int LogStatsLogger(ThreadVars *tv, void *thread_data, const StatsTable *s
                 if (!(aft->statslog_ctx->flags & LOG_STATS_NULLS) && st->tstats[u].value == 0)
                     continue;
 
+                if(in_min != 0){
+                   
+                    tminSt = (st->stats[u].value)/in_min;
+           
+                }
+                
                 char line[256];
-                size_t len = snprintf(line, sizeof(line), "%-42s | %-25s | %-" PRIu64 "\n",
-                        st->tstats[u].name, st->tstats[u].tm_name, st->tstats[u].value);
+                size_t len = snprintf(line, sizeof(line), "%-42s | %-25s | %-" PRIu64 "|    %-25" PRIu64 "\n",
+                        st->tstats[u].name, st->tstats[u].tm_name, st->tstats[u].value, tminSt);
 
                 /* since we can have many threads, the buffer might not be big enough.
                  * Expand if necessary. */

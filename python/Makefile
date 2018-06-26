@@ -134,7 +134,7 @@ CARGO =
 CARGO_HOME = 
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -march=native
+CFLAGS = -ggdb -O0 -march=native
 CLANG_CFLAGS = 
 CONFIGURE_LOCALSTATEDIR = /var
 CONFIGURE_PREFIX = /usr
@@ -165,7 +165,7 @@ HAVE_LLC =
 HAVE_PCAP_CONFIG = /usr/bin/pcap-config
 HAVE_PDFLATEX = no
 HAVE_PKG_CONFIG = /usr/bin/pkg-config
-HAVE_PYTHON = no
+HAVE_PYTHON = /usr/bin/python
 HAVE_RUSTC = 
 HAVE_SPHINXBUILD = no
 HAVE_WGET = /usr/bin/wget
@@ -401,7 +401,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-local:
+#all-local:
 all-am: Makefile all-local
 installdirs:
 install: install-am
@@ -434,10 +434,10 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-uninstall-local:
-distclean-local:
-install-exec-local:
-clean-local:
+#uninstall-local:
+#distclean-local:
+#install-exec-local:
+#clean-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-local mostlyclean-am
@@ -522,31 +522,31 @@ uninstall-am: uninstall-local
 .PRECIOUS: Makefile
 
 
-#all-local:
-#	cd $(srcdir) && \
-#		$(HAVE_PYTHON) setup.py build --build-base $(abs_builddir)
+all-local:
+	cd $(srcdir) && \
+		$(HAVE_PYTHON) setup.py build --build-base $(abs_builddir)
 
-#install-exec-local:
-#	cd $(srcdir) && \
-#		$(HAVE_PYTHON) setup.py build --build-base $(abs_builddir) \
-#		install --prefix $(DESTDIR)$(prefix)
+install-exec-local:
+	cd $(srcdir) && \
+		$(HAVE_PYTHON) setup.py build --build-base $(abs_builddir) \
+		install --prefix $(DESTDIR)$(prefix)
 
-#uninstall-local:
-#	rm -f $(DESTDIR)$(bindir)/suricatactl
-#	rm -f $(DESTDIR)$(bindir)/suricatasc
-#	rm -rf $(DESTDIR)$(prefix)/lib*/python*/site-packages/suricata
-#	rm -rf $(DESTDIR)$(prefix)/lib*/python*/site-packages/suricatasc
-#	rm -rf $(DESTDIR)$(prefix)/lib*/python*/site-packages/suricata-[0-9]*.egg-info
+uninstall-local:
+	rm -f $(DESTDIR)$(bindir)/suricatactl
+	rm -f $(DESTDIR)$(bindir)/suricatasc
+	rm -rf $(DESTDIR)$(prefix)/lib*/python*/site-packages/suricata
+	rm -rf $(DESTDIR)$(prefix)/lib*/python*/site-packages/suricatasc
+	rm -rf $(DESTDIR)$(prefix)/lib*/python*/site-packages/suricata-[0-9]*.egg-info
 
-#clean-local:
-#	cd $(srcdir) && \
-#		$(HAVE_PYTHON) setup.py clean \
-#		--build-base $(abs_builddir)
-#	rm -rf scripts-* lib* build
-#	find . -name \*.pyc -print0 | xargs -0 rm -f
+clean-local:
+	cd $(srcdir) && \
+		$(HAVE_PYTHON) setup.py clean \
+		--build-base $(abs_builddir)
+	rm -rf scripts-* lib* build
+	find . -name \*.pyc -print0 | xargs -0 rm -f
 
-#distclean-local:
-#	rm -f version
+distclean-local:
+	rm -f version
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

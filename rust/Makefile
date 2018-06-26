@@ -90,10 +90,10 @@ host_triplet = x86_64-pc-linux-gnu
 #am__append_1 = Cargo.lock
 #am__append_2 = vendor
 ##am__append_3 = lua
-##am__append_4 = debug
+#am__append_4 = debug
 
 # Can only include the headers if we have Python to generate them.
-##am__append_5 = gen/c-headers
+#am__append_5 = gen/c-headers
 subdir = rust
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libprelude.m4 \
@@ -141,7 +141,7 @@ CARGO =
 CARGO_HOME = 
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -march=native
+CFLAGS = -ggdb -O0 -march=native
 CLANG_CFLAGS = 
 CONFIGURE_LOCALSTATEDIR = /var
 CONFIGURE_PREFIX = /usr
@@ -172,7 +172,7 @@ HAVE_LLC =
 HAVE_PCAP_CONFIG = /usr/bin/pcap-config
 HAVE_PDFLATEX = no
 HAVE_PKG_CONFIG = /usr/bin/pkg-config
-HAVE_PYTHON = no
+HAVE_PYTHON = /usr/bin/python
 HAVE_RUSTC = 
 HAVE_SPHINXBUILD = no
 HAVE_WGET = /usr/bin/wget
@@ -329,7 +329,7 @@ top_srcdir = ..
 EXTRA_DIST = Cargo.toml src .cargo/config.in gen-c-headers.py \
 	$(am__append_1) $(am__append_2) $(am__append_5)
 ##FROZEN = --frozen
-#RELEASE = --release
+##RELEASE = --release
 all: all-am
 
 .SUFFIXES:
@@ -529,11 +529,11 @@ uninstall-am:
 
 
 #all-local:
-##	cd $(top_srcdir)/rust && $(HAVE_PYTHON) ./gen-c-headers.py
-##	CARGO_HOME=$(CARGO_HOME) $(CARGO) build $(RELEASE) $(FROZEN) \
-##		--features "$(RUST_FEATURES)"
+#	cd $(top_srcdir)/rust && $(HAVE_PYTHON) ./gen-c-headers.py
 #	CARGO_HOME=$(CARGO_HOME) $(CARGO) build $(RELEASE) $(FROZEN) \
 #		--features "$(RUST_FEATURES)"
+##	CARGO_HOME=$(CARGO_HOME) $(CARGO) build $(RELEASE) $(FROZEN) \
+##		--features "$(RUST_FEATURES)"
 
 #clean-local:
 #	-rm -rf target
@@ -550,9 +550,9 @@ uninstall-am:
 #vendor:
 #	CARGO_HOME=$(CARGO_HOME) $(CARGO) vendor > /dev/null
 ##vendor:
-##gen/c-headers:
-##	cd $(top_srcdir)/rust && $(HAVE_PYTHON) ./gen-c-headers.py
 #gen/c-headers:
+#	cd $(top_srcdir)/rust && $(HAVE_PYTHON) ./gen-c-headers.py
+##gen/c-headers:
 
 all-local clean-local check vendor gen/c-headers:
 

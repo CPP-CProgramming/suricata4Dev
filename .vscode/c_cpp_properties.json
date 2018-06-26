@@ -4,12 +4,28 @@
             "name": "Linux",
             "browse": {
                 "path": [
-                    "${workspaceFolder}"
+                    "/usr/include",
+                    "/usr/share",
+                    "/usr/lib",
+                    "/usr/libexec",
+                    "/usr/include/nspr",
+                    "/usr/include/nss",
+
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/libhtp/htp"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
-                "${workspaceFolder}"
+                "/usr/include",
+                "/usr/share",
+                "/usr/lib",
+                "/usr/libexec",
+                "/usr/include/nspr",
+                "/usr/include/nss",
+
+                "${workspaceFolder}",
+                "${workspaceFolder}/libhtp/htp"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

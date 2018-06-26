@@ -94,7 +94,7 @@ suricata_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 
 # different flags for different cases
-#am__append_1 = -ggdb -O0
+am__append_1 = -ggdb -O0
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libprelude.m4 \
@@ -446,7 +446,7 @@ CARGO =
 CARGO_HOME = 
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -march=native
+CFLAGS = -ggdb -O0 -march=native
 CLANG_CFLAGS = 
 CONFIGURE_LOCALSTATEDIR = /var
 CONFIGURE_PREFIX = /usr
@@ -477,7 +477,7 @@ HAVE_LLC =
 HAVE_PCAP_CONFIG = /usr/bin/pcap-config
 HAVE_PDFLATEX = no
 HAVE_PKG_CONFIG = /usr/bin/pkg-config
-HAVE_PYTHON = no
+HAVE_PYTHON = /usr/bin/python
 HAVE_RUSTC = 
 HAVE_SPHINXBUILD = no
 HAVE_WGET = /usr/bin/wget
